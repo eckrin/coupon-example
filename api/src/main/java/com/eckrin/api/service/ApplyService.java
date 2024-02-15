@@ -19,12 +19,11 @@ public class ApplyService {
     // redis incr 자체 성능이 좋고, redis가 싱글스레드에서 동작
     public void apply(Long userId) {
 //        long count = couponRepository.count();
-        Long count = couponCountRepository.increment();
-
+        long count = couponCountRepository.increment();
         if(count > 100) {
             return;
         }
-
+        
 //        couponRepository.save(new Coupon(userId));
         couponCreateProducer.create(userId); // topic에 userId 전송
     }
