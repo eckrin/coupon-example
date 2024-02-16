@@ -56,4 +56,30 @@ class ApplyServiceTest {
 
         assertThat(count).isEqualTo(100); // 100개보다 많은 양의 쿠폰이 발급됨
     }
+
+    @Test
+    @DisplayName("동시에 여러개 발급 - 한명당 쿠폰 1개씩 제한")
+    public void enterNumerousCouponsToEachUser() throws InterruptedException {
+        int threadCount = 1000;
+        ExecutorService executorService = Executors.newFixedThreadPool(32);
+        CountDownLatch latch = new CountDownLatch(threadCount);
+
+        for(int i=0; i<threadCount; i++) {
+            executorService.submit(() -> {
+                try {
+                    applyService.apply(1L);
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+
+        Thread.sleep(10000);
+
+        long count = couponRepository.count();
+
+        assertThat(count).isEqualTo(1); // 100개보다 많은 양의 쿠폰이 발급됨
+    }
 }
